@@ -1,0 +1,256 @@
+import random
+import os.path
+import json
+
+def draw_board(board):
+    """
+    Draw the game board.
+
+    Args:
+    The game board represented.
+
+    Returns:
+    None
+    """
+    print('  -----------\n',
+          '|', board[0][0], '|', board[0][1], '|', board[0][2], '|\n'
+          '  -----------\n',
+          '|', board[1][0], '|', board[1][1], '|', board[1][2], '|\n',
+          ' -----------\n',
+          '|', board[2][0], '|', board[2][1], '|', board[2][2], '|\n',
+          ' -----------\n')
+
+def welcome():
+    """
+    Display the welcome message.
+
+    Returns:
+    None
+    """
+    print("Welcome to Noughts and Crosses!")
+
+def initialise_board():
+    """
+    Initialize an empty game board.
+
+    Returns:
+    The initialized game board.
+    """
+    return [[' '] * 3 for _ in range(3)]
+
+def get_player_move(board):
+    """
+    Get the player's move.
+
+    Args:
+    The game board represented.
+
+    Returns:
+    Row and column of the player's move.
+    """
+    while True:
+        try:
+            row = int(input("Enter row (1,2,3): "))
+            row = row-1
+            col = int(input("Enter column (1,2,3): "))
+            col= col-1
+            if row in range(3) and col in range(3) and board[row][col] == ' ':
+                return row, col
+            else:
+                print("Invalid move. Try again.")
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+
+def choose_computer_move(board):
+    """
+    Choose the computer's move.
+
+    Args:
+    The game board represented.
+
+    Returns:
+    Row and column of the computer's move.
+    """
+    available_moves = [(row, col) for row in range(3) for col in range(3) if board[row][col] == ' ']
+    return random.choice(available_moves)
+
+def check_for_win(board, mark):
+    """
+    Check if the player has won the game.
+
+    Args:
+    The game board represented.
+    The player's mark 'X' or 'O'.
+
+    Returns:
+    True if the player has won.
+    """
+    win_conditions = [
+        [board[i][j] == mark for j in range(3)] for i in range(3)
+    ] + [
+        [board[j][i] == mark for j in range(3)] for i in range(3)
+    ] + [
+        [board[i][i] == mark for i in range(3)]
+    ] + [
+        [board[i][2-i] == mark for i in range(3)]
+    ]
+    return any(all(condition) for condition in win_conditions)
+
+def check_for_draw(board):
+    """
+    Check if the game is a draw.
+
+    Args:
+    The game board represented.
+
+    Returns:
+    True if the game is a draw.
+    """
+    return all(board[i][j] != ' ' for i in range(3) for j in range(3))
+
+def play_game():
+    """
+    Play the Noughts and Crosses game.
+
+    Returns:
+    The game result (-1 for computer win, 0 for draw, 1 for player win).
+    """
+    board = initialise_board()
+    draw_board(board)
+    player_mark = 'X'
+    computer_mark = 'O'
+
+    while True:
+        row, col = get_player_move(board)
+        board[row][col] = player_mark
+        draw_board(board)
+        if check_for_win(board, player_mark):
+            print("Congratulations! You win!")
+            return 1
+        elif check_for_draw(board):
+            print("Draw!")
+            return 0
+
+        row, col = choose_computer_move(board)
+        board[row][col] = computer_mark
+        draw_board(board)
+        if check_for_win(board, computer_mark):
+            print("Sorry, you lose. Try again!")
+            return -1
+        elif check_for_draw(board):
+            print("Draw!")
+            return 0
+
+def menu():
+    """
+    Display the menu options and get the user's choice.
+
+    Returns:
+    The user's choice.
+    """
+    print("Menu:")
+    print("1. Play game")
+    print("2. save score")
+    print("3. load score from leadership board")
+    print("4. quit")
+    choice = input("Enter your choice: ")
+    return choice
+
+def load_scores():
+    """
+    Load the leaderboard scores from a file.
+
+    Returns:
+    The leaderboard scores.
+    """
+    if os.path.exists('leaderboard.txt'):
+        with open('leaderboard.txt','r') as file:
+            return json.load(file)
+    else:
+        return {}
+
+def save_score(score):
+    """
+    Save the player's score to the leaderboard file.
+
+    Args:
+    The player's score.
+
+    Returns:
+    None
+    """
+    name = input("Enter your name: ")
+    scores = load_scores()
+    scores[name] = score
+    with open('leaderboard.txt', 'w') as file:
+        json.dump(scores, file)
+
+def display_leaderboard(scores):
+    """
+    Display the leaderboard.
+
+    Args:
+    The leaderboard scores.
+
+    Returns:
+    None
+    """
+    print("sores from Leaderboard:")
+    for name, score in scores.items():
+        print(f"{name}: {score}")
+6
+def main():
+    """
+    Main function to run the Noughts and Crosses game.
+
+    Returns:
+    - None
+    """
+    welcome()
+    total_score = 0
+
+    while True:
+        choice = menu()
+        if choice == '1':
+            score = play_game()
+            total_score += score
+            print('Your current score is:', total_score)
+        if choice == '2':
+            save_score(total_score)
+        if choice == '3':
+            leader_board = load_scores()
+            display_leaderboard(leader_board)
+        if choice=='4':
+            print('Thank you for playing the "Unbeatable Noughts and Crosses" game.')
+            print('Good bye')
+            return
+
+if __name__ == '__main__':
+    main()
+def main():
+    """
+    Main function to run the Noughts and Crosses game.
+
+    Returns:
+    - None
+    """
+    welcome()
+    total_score = 0
+
+    while True:
+        choice = menu()
+        if choice == '1':
+            score = play_game()
+            total_score += score
+            print('Your current score is:', total_score)
+        if choice == '2':
+            save_score(total_score)
+        if choice == '3':
+            leader_board = load_scores()
+            display_leaderboard(leader_board)
+            print('Thank you for playing the "Unbeatable Noughts and Crosses" game.')
+            print('Good bye')
+            return
+
+if __name__ == '__main__':
+    main()
